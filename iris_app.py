@@ -41,23 +41,35 @@ def prediction(sepal_length, sepal_width, petal_length, petal_width):
 st.title("Iris Flower Species Prediction App")
 
 # Add 4 sliders and store the value returned by them in 4 separate variables.
-s_len = st.slider("Sepal Length", 0.0, 10.0)
-s_wid = st.slider("Sepal Width", 0.0, 10.0)
-p_len = st.slider("Petal Length", 0.0, 10.0)
-p_wid = st.slider("Petal Width", 0.0, 10.0)
+st.sidebar.title("Iris Species Prediction App")
 
-# When 'Predict' button is pushed, the 'prediction()' function must be called
-# and the value returned by it must be stored in a variable, say 'species_type'.
+# Add 4 sliders and store the value returned by them in 4 separate variables.
+s_len = st.sidebar.slider("Sepal Length", float(iris_df["SepalLengthCm"].min()), float(iris_df["SepalLengthCm"].max()))
+# The 'float()' function converts the 'numpy.float' values to Python float values.
+s_wid = st.sidebar.slider("Sepal Width", float(iris_df["SepalWidthCm"].min()), float(iris_df["SepalWidthCm"].max()))
+p_len = st.sidebar.slider("Petal Length", float(iris_df["PetalLengthCm"].min()), float(iris_df["PetalLengthCm"].max()))
+p_wid = st.sidebar.slider("Petal Width", float(iris_df["PetalWidthCm"].min()), float(iris_df["PetalWidthCm"].max()))
+
+# Add a select box in the sidebar with the 'Classifier' label.
+# Also pass 3 options as a tuple ('Support Vector Machine', 'Logistic Regression', 'Random Forest Classifier').
+# Store the current value of this slider in the 'classifier' variable.
+classifier = st.sidebar.selectbox('Classifier', ('Support Vector Machine', 'Logistic Regression', 'Random Forest Classifier'))
+
+# When the 'Predict' button is clicked, check which classifier is chosen and call the 'prediction()' function.
+# Store the predicted value in the 'species_type' variable accuracy score of the model in the 'score' variable.
 # Print the values of 'species_type' and 'score' variables using the 'st.text()' function.
-if st.button("Predict"):
-	species_type = prediction(s_len, s_wid, p_len, p_wid)
-	st.write("Species predicted:", species_type)
-	st.write("Accuracy score of this model is:", score)
+if st.sidebar.button("Predict"):
+  if classifier == 'Support Vector Machine':
+    species_type = prediction(svc_model, s_len, s_wid, p_len, p_wid)
+    score = svc_model.score(X_train, y_train)
 
-rf_clf = RandomForestClassifier(n_jobs = -1, n_estimators = 100)
-rf_clf.fit(X_train, y_train)
+  elif classifier =='Logistic Regression':
+    species_type = prediction(log_reg, s_len, s_wid, p_len, p_wid)
+    score = log_reg.score(X_train, y_train)
 
-# Creating a Random Forest Classifier model.
-log_reg = LogisticRegression(n_jobs = -1)
-log_reg.fit(X_train, y_train)
+  else:
+    species_type = prediction(rf_clf, s_len, s_wid, p_len, p_wid)
+    score = rf_clf.score(X_train, y_train)
 
+  st.write("Species predicted:", species_type)
+  st.write("Accuracy score of this model is:", score)
